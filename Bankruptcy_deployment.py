@@ -46,7 +46,7 @@ def predict_bankruptcy(debt_ratio, net_income_to_assets, net_worth_to_assets):
         net_worth_to_assets = float(net_worth_to_assets)
         
         # Transform input data using the complete preprocessing pipeline
-        input_data = np.array([[debt_ratio, net_income_to_assets, net_worth_to_assets] + [0] * 7])  # Pad with zeros to match 10 features
+        input_data = np.array([[debt_ratio, net_income_to_assets, net_worth_to_assets]])  # No need to pad with zeros
         input_data_scaled = scaler.transform(input_data)  # Transform using trained scaler
         input_data_pca = pca.transform(input_data_scaled)  # Transform using trained PCA
         input_data_imputed = imputer.transform(input_data_pca)  # Transform using trained Imputer
@@ -54,8 +54,9 @@ def predict_bankruptcy(debt_ratio, net_income_to_assets, net_worth_to_assets):
         # Predict bankruptcy based on input features
         prediction = bag_clf.predict(input_data_imputed)
         return prediction[0]
-    except ValueError:
-        # Handle invalid input values
+    except ValueError as e:
+        # Print the error message for debugging
+        print(f"ValueError occurred: {e}")
         return None
 
 # Streamlit UI
@@ -68,7 +69,7 @@ net_worth_to_assets = st.text_input("Enter Net Worth to Total Assets:")
 
 # Predict button
 if st.button("Predict"):
-    if debt_ratio and net_income_to_assets and net_worth_to_assets:
+    if debt_ratio.strip() and net_income_to_assets.strip() and net_worth_to_assets.strip():
         prediction = predict_bankruptcy(debt_ratio, net_income_to_assets, net_worth_to_assets)
         if prediction is not None:
             st.write("Prediction:", "Bankrupt" if prediction == 1 else "Not Bankrupt")
