@@ -62,9 +62,9 @@ def predict_bankruptcy(debt_ratio, net_income_to_assets, net_worth_to_assets):
 st.title("Bankruptcy Prediction")
 
 # Input fields for user
-debt_ratio = st.text_input("Enter Debt Ratio:").strip()
-net_income_to_assets = st.text_input("Enter Net Income to Total Assets:").strip()
-net_worth_to_assets = st.text_input("Enter Net Worth to Total Assets:").strip()
+debt_ratio = st.text_input("Enter Debt Ratio:")
+net_income_to_assets = st.text_input("Enter Net Income to Total Assets:")
+net_worth_to_assets = st.text_input("Enter Net Worth to Total Assets:")
 
 # Predict button
 if st.button("Predict"):
