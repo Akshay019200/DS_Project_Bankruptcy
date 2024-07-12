@@ -6,7 +6,6 @@ from sklearn.preprocessing import StandardScaler
 from imblearn.over_sampling import RandomOverSampler
 from sklearn.decomposition import PCA
 from sklearn.impute import SimpleImputer
-from joblib._parallel_args import _joblib_parallel_args
 import streamlit as st
 
 # Read the dataset
