@@ -69,11 +69,21 @@ net_worth_to_assets = st.text_input("Enter Net Worth to Total Assets:")
 
 # Predict button
 if st.button("Predict"):
-    if debt_ratio.strip() and net_income_to_assets.strip() and net_worth_to_assets.strip():
-        prediction = predict_bankruptcy(debt_ratio, net_income_to_assets, net_worth_to_assets)
-        if prediction is not None:
-            st.write("Prediction:", "Bankrupt" if prediction == 1 else "Not Bankrupt")
+    try:
+        # Validate input fields
+        if debt_ratio.strip() and net_income_to_assets.strip() and net_worth_to_assets.strip():
+            # Check if inputs are valid numerical values
+            debt_ratio = float(debt_ratio)
+            net_income_to_assets = float(net_income_to_assets)
+            net_worth_to_assets = float(net_worth_to_assets)
+
+            # Perform prediction
+            prediction = predict_bankruptcy(debt_ratio, net_income_to_assets, net_worth_to_assets)
+            if prediction is not None:
+                st.write("Prediction:", "Bankrupt" if prediction == 1 else "Not Bankrupt")
+            else:
+                st.write("Unable to make a prediction.")
         else:
-            st.write("Please enter valid numerical values for all input fields.")
-    else:
-        st.write("Please fill in all input fields.")
+            st.write("Please fill in all input fields.")
+    except ValueError:
+        st.write("Please enter valid numerical values for all input fields.")
