@@ -46,23 +46,22 @@ def predict_bankruptcy(debt_ratio, net_income_to_assets, net_worth_to_assets):
         net_worth_to_assets = float(net_worth_to_assets)
         
         # Transform input data using the complete preprocessing pipeline
-        input_data = np.array([[debt_ratio, net_income_to_assets, net_worth_to_assets]])  # No need to pad with zeros
+        input_data = np.array([[debt_ratio, net_income_to_assets, net_worth_to_assets]])
         
-        print("Input Data:", input_data)  # Debug log
+        # Refit the scaler on the input data
+        scaler_refit = StandardScaler()
+        input_data_scaled = scaler_refit.fit_transform(input_data)
         
-        input_data_scaled = scaler.transform(input_data)  # Transform using trained scaler
-        print("Scaled Input Data:", input_data_scaled)  # Debug log
+        # Refit the PCA on the scaled input data
+        pca_refit = PCA(n_components=10)
+        input_data_pca = pca_refit.fit_transform(input_data_scaled)
         
-        input_data_pca = pca.transform(input_data_scaled)  # Transform using trained PCA
-        print("PCA Transformed Input Data:", input_data_pca)  # Debug log
+        # Refit the imputer on the PCA-transformed input data
+        imputer_refit = SimpleImputer(strategy='mean')
+        input_data_imputed = imputer_refit.fit_transform(input_data_pca)
         
-        input_data_imputed = imputer.transform(input_data_pca)  # Transform using trained Imputer
-        print("Imputed Input Data:", input_data_imputed)  # Debug log
-
         # Predict bankruptcy based on input features
         prediction = bag_clf.predict(input_data_imputed)
-        print("Prediction:", prediction)  # Debug log
-        
         return prediction[0]
     except Exception as e:
         # Print the error message for debugging
