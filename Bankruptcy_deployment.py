@@ -17,7 +17,7 @@ y = df["Bankrupt?"]
 
 # Fit and transform the data for preprocessing
 scaler = StandardScaler()
-pca = PCA(n_components=10)  # Use the same number of components as during training
+pca = PCA(n_components=10)  # Adjust the number of components if needed
 imputer = SimpleImputer(strategy='mean')
 ros = RandomOverSampler()
 
@@ -46,7 +46,11 @@ def predict_bankruptcy(debt_ratio, net_income_to_assets, net_worth_to_assets):
         net_worth_to_assets = float(net_worth_to_assets)
         
         # Transform input data using the complete preprocessing pipeline
-        input_data = np.array([[debt_ratio, net_income_to_assets, net_worth_to_assets]])  # No need to pad with zeros
+        input_data = np.array([[debt_ratio, net_income_to_assets, net_worth_to_assets]])
+        
+        # Add padding to match the number of features if needed
+        if input_data.shape[1] < 96:
+            input_data = np.pad(input_data, ((0, 0), (0, 96 - input_data.shape[1])), 'constant')
         
         print("Input Data:", input_data)  # Debug log
         
