@@ -9,7 +9,7 @@ from sklearn.impute import SimpleImputer
 import streamlit as st
 
 # Read the dataset
-df = pd.read_csv("Bankruptcy Prediction (1).csv")
+df = pd.read_csv("Bankruptcy Prediction.csv")
 
 # Assuming x and y are your preprocessed features and target
 x = df.drop("Bankrupt?", axis=1)
