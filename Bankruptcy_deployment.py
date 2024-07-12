@@ -64,9 +64,9 @@ def predict_bankruptcy(debt_ratio, net_income_to_assets, net_worth_to_assets):
         print("Prediction:", prediction)  # Debug log
         
         return prediction[0]
-    except ValueError as e:
+    except Exception as e:
         # Print the error message for debugging
-        print(f"ValueError occurred: {e}")
+        print(f"An error occurred during prediction: {e}")
         return None
 
 # Streamlit UI
