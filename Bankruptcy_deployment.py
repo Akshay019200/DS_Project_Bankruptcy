@@ -29,7 +29,7 @@ x_resample_final, y_resample_final = ros.fit_resample(x_imputed, y)
 
 # Train your BaggingClassifier
 dt = DecisionTreeClassifier()
-bag_clf = BaggingClassifier(estimator=dt,
+bag_clf = BaggingClassifier(base_estimator=dt,
                             n_estimators=100,
                             max_samples=0.6,
                             max_features=0.7)
