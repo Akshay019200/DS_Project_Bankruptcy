@@ -43,11 +43,20 @@ def predict_bankruptcy(debt_ratio, net_income_to_assets, net_worth_to_assets):
         scaler_refit = StandardScaler()
         input_data_scaled = scaler_refit.fit_transform(input_data)
 
+        print("Input data shape:", input_data_scaled.shape)
+        print("Input data dtype:", input_data_scaled.dtype)
+
         # Predict bankruptcy based on input features
         prediction = bag_clf.predict(input_data_scaled)
         return prediction[0]
+    except ValueError as ve:
+        print(f"ValueError: {ve}")
+        return None
+    except TypeError as te:
+        print(f"TypeError: {te}")
+        return None
     except Exception as e:
-        print(f"An error occurred during prediction: {e}")
+        print(f"Exception: {e}")
         return None
 
 # Streamlit UI
