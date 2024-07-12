@@ -15,27 +15,18 @@ df = pd.read_csv("Bankruptcy Prediction (1).csv")
 x = df.drop("Bankrupt?", axis=1)
 y = df["Bankrupt?"]
 
-# Fit and transform the data for preprocessing
+# Preprocess the data
 scaler = StandardScaler()
-pca = PCA(n_components=10)  # Use the same number of components as during training
-imputer = SimpleImputer(strategy='mean')
-ros = RandomOverSampler()
-
-# Fit on training data
 x_scaled = scaler.fit_transform(x)
-x_pca = pca.fit_transform(x_scaled)
-x_imputed = imputer.fit_transform(x_pca)
-x_resample_final, y_resample_final = ros.fit_resample(x_imputed, y)
 
-# Train your BaggingClassifier
+# Oversample the minority class
+ros = RandomOverSampler()
+x_resample, y_resample = ros.fit_resample(x_scaled, y)
+
+# Train the BaggingClassifier
 dt = DecisionTreeClassifier()
-bag_clf = BaggingClassifier(base_estimator=dt,
-                            n_estimators=100,
-                            max_samples=0.6,
-                            max_features=0.7)
-
-# Train the bagging classifier on the final preprocessed data
-bag_clf.fit(x_resample_final, y_resample_final)
+bag_clf = BaggingClassifier(base_estimator=dt, n_estimators=100)
+bag_clf.fit(x_resample, y_resample)
 
 # Define a function to predict bankruptcy based on input features
 def predict_bankruptcy(debt_ratio, net_income_to_assets, net_worth_to_assets):
@@ -44,39 +35,18 @@ def predict_bankruptcy(debt_ratio, net_income_to_assets, net_worth_to_assets):
         debt_ratio = float(debt_ratio)
         net_income_to_assets = float(net_income_to_assets)
         net_worth_to_assets = float(net_worth_to_assets)
-        
-        print("Input values:", debt_ratio, net_income_to_assets, net_worth_to_assets)
-        
-        # Transform input data using the complete preprocessing pipeline
+
+        # Create a 2D array from the input values
         input_data = np.array([[debt_ratio, net_income_to_assets, net_worth_to_assets]])
-        
-        # Refit the scaler on the input data
+
+        # Scale the input data
         scaler_refit = StandardScaler()
         input_data_scaled = scaler_refit.fit_transform(input_data)
-        print("Scaled input data:", input_data_scaled)
-        
-        # Refit the PCA on the scaled input data
-        pca_refit = PCA(n_components=10)
-        input_data_pca = pca_refit.fit_transform(input_data_scaled)
-        print("PCA-transformed input data:", input_data_pca)
-        
-        # Refit the imputer on the PCA-transformed input data
-        imputer_refit = SimpleImputer(strategy='mean')
-        input_data_imputed = imputer_refit.fit_transform(input_data_pca)
-        print("Imputed input data:", input_data_imputed)
-        
+
         # Predict bankruptcy based on input features
-        prediction = bag_clf.predict(input_data_imputed)
-        print("Prediction:", prediction)
-        
-        # Check if the prediction is valid
-        if prediction.shape[0] == 1 and prediction.dtype == np.int64:
-            return prediction[0]
-        else:
-            print("Invalid prediction shape or type")
-            return None
+        prediction = bag_clf.predict(input_data_scaled)
+        return prediction[0]
     except Exception as e:
-        # Print the error message for debugging
         print(f"An error occurred during prediction: {e}")
         return None
 
