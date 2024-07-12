@@ -68,7 +68,13 @@ def predict_bankruptcy(debt_ratio, net_income_to_assets, net_worth_to_assets):
         # Predict bankruptcy based on input features
         prediction = bag_clf.predict(input_data_imputed)
         print("Prediction:", prediction)
-        return prediction[0]
+        
+        # Check if the prediction is valid
+        if prediction.shape[0] == 1 and prediction.dtype == np.int64:
+            return prediction[0]
+        else:
+            print("Invalid prediction shape or type")
+            return None
     except Exception as e:
         # Print the error message for debugging
         print(f"An error occurred during prediction: {e}")
