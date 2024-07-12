@@ -15,18 +15,27 @@ df = pd.read_csv("Bankruptcy Prediction (1).csv")
 x = df.drop("Bankrupt?", axis=1)
 y = df["Bankrupt?"]
 
-# Preprocess the data
+# Fit and transform the data for preprocessing
 scaler = StandardScaler()
-x_scaled = scaler.fit_transform(x)
-
-# Oversample the minority class
+pca = PCA(n_components=10)  # Use the same number of components as during training
+imputer = SimpleImputer(strategy='mean')
 ros = RandomOverSampler()
-x_resample, y_resample = ros.fit_resample(x_scaled, y)
 
-# Train the BaggingClassifier
+# Fit on training data
+x_scaled = scaler.fit_transform(x)
+x_pca = pca.fit_transform(x_scaled)
+x_imputed = imputer.fit_transform(x_pca)
+x_resample_final, y_resample_final = ros.fit_resample(x_imputed, y)
+
+# Train your BaggingClassifier
 dt = DecisionTreeClassifier()
-bag_clf = BaggingClassifier(base_estimator=dt, n_estimators=100)
-bag_clf.fit(x_resample, y_resample)
+bag_clf = BaggingClassifier(base_estimator=dt,
+                            n_estimators=100,
+                            max_samples=0.6,
+                            max_features=0.7)
+
+# Train the bagging classifier on the final preprocessed data
+bag_clf.fit(x_resample_final, y_resample_final)
 
 # Define a function to predict bankruptcy based on input features
 def predict_bankruptcy(debt_ratio, net_income_to_assets, net_worth_to_assets):
@@ -35,28 +44,29 @@ def predict_bankruptcy(debt_ratio, net_income_to_assets, net_worth_to_assets):
         debt_ratio = float(debt_ratio)
         net_income_to_assets = float(net_income_to_assets)
         net_worth_to_assets = float(net_worth_to_assets)
-
-        # Create a 2D array from the input values
-        input_data = np.array([[debt_ratio, net_income_to_assets, net_worth_to_assets]])
-
-        # Scale the input data
-        scaler_refit = StandardScaler()
-        input_data_scaled = scaler_refit.fit_transform(input_data)
-
-        print("Input data shape:", input_data_scaled.shape)
-        print("Input data dtype:", input_data_scaled.dtype)
+        
+        # Transform input data using the complete preprocessing pipeline
+        input_data = np.array([[debt_ratio, net_income_to_assets, net_worth_to_assets]])  # No need to pad with zeros
+        
+        print("Input Data:", input_data)  # Debug log
+        
+        input_data_scaled = scaler.transform(input_data)  # Transform using trained scaler
+        print("Scaled Input Data:", input_data_scaled)  # Debug log
+        
+        input_data_pca = pca.transform(input_data_scaled)  # Transform using trained PCA
+        print("PCA Transformed Input Data:", input_data_pca)  # Debug log
+        
+        input_data_imputed = imputer.transform(input_data_pca)  # Transform using trained Imputer
+        print("Imputed Input Data:", input_data_imputed)  # Debug log
 
         # Predict bankruptcy based on input features
-        prediction = bag_clf.predict(input_data_scaled)
+        prediction = bag_clf.predict(input_data_imputed)
+        print("Prediction:", prediction)  # Debug log
+        
         return prediction[0]
-    except ValueError as ve:
-        print(f"ValueError: {ve}")
-        return None
-    except TypeError as te:
-        print(f"TypeError: {te}")
-        return None
     except Exception as e:
-        print(f"Exception: {e}")
+        # Print the error message for debugging
+        print(f"An error occurred during prediction: {e}")
         return None
 
 # Streamlit UI
